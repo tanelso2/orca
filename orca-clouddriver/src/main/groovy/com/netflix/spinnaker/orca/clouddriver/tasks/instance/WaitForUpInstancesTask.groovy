@@ -80,6 +80,12 @@ class WaitForUpInstancesTask extends AbstractWaitingForInstancesTask {
     Map capacity = (Map) serverGroup.capacity
     Integer targetDesiredSize = capacity.desired as Integer
 
+    // don't wait for spot instances to come up because they might not come up for a while depending on the price
+    // This should probably be moved to an AWS-specific part of the codebase
+    if (serverGroup?.launchConfig?.spotPrice != null) {
+      return 0
+    }
+
     if (stage.context.capacitySnapshot) {
       Integer snapshotCapacity = ((Map) stage.context.capacitySnapshot).desiredCapacity as Integer
       // if the server group is being actively scaled down, this operation might never complete,
